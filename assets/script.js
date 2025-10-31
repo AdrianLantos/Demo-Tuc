@@ -836,13 +836,13 @@ function handleScroll() {
 window.addEventListener('scroll', handleScroll, { passive: true });
 
 // Handle window resize for responsive behavior
-let resizeTimeout;
-window.addEventListener('resize', () => {
-    clearTimeout(resizeTimeout);
-    resizeTimeout = setTimeout(() => {
-        location.reload(); // Reload on significant resize to recalculate
-    }, 250);
-}, { passive: true });
+// let resizeTimeout;
+// window.addEventListener('resize', () => {
+//     clearTimeout(resizeTimeout);
+//     resizeTimeout = setTimeout(() => {
+//         location.reload(); // Reload on significant resize to recalculate
+//     }, 250);
+// }, { passive: true });
 
 // Initial call
 handleScroll();
