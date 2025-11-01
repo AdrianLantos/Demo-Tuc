@@ -15,11 +15,11 @@ const CONFIG = {
 
     // About section: Two-stage animation (headline → body text)
     about: {
-        headlineStart: 0,    // Headline starts immediately (0% scroll)
-        headlineEnd: 0.3,    // Headline completes (30% scroll)
-        textStart: 0.35,     // Body text starts after headline (35% scroll)
-        textEnd: 0.6,        // Body text completes (60% scroll)
-        svgStart: 0.55,      // SVG animation starts (55% scroll)
+        headlineStart: 0.1,    // Headline starts immediately (0% scroll)
+        headlineEnd: 0.25,    // Headline completes (30% scroll)
+        textStart: 0.25,     // Body text starts after headline (35% scroll)
+        textEnd: 0.7,        // Body text completes (60% scroll)
+        svgStart: 0.25,      // SVG animation starts (55% scroll)
         svgEnd: 0.75         // SVG animation completes (95% scroll)
     },
 
@@ -27,10 +27,10 @@ const CONFIG = {
     service: {
         headlineStart: 0,      // Headline starts immediately
         headlineEnd: 0.2,      // Headline completes quickly (20% scroll)
-        startDelay: 0.25,      // Delay before first service item appears
-        itemDelay: 0.15,       // Delay between each service item
-        svgStart: 0.05,        // SVG strikethrough starts early
-        svgDuration: 0.25      // Duration of SVG animation
+        startDelay: 0.35,      // Delay before first service item appears
+        itemDelay: 0.10,       // Delay between each service item
+        svgStart: 0.2,        // SVG strikethrough starts early
+        svgDuration: 0.1      // Duration of SVG animation
     },
 
     // Partners section: Headline → logo grid
@@ -47,7 +47,7 @@ const CONFIG = {
         textStart: 0.1,
         textEnd: 0.35,
         svgStart: 0.35,
-        svgEnd: 0.6
+        svgEnd: 0.55
     },
 
     cta: {
@@ -207,9 +207,9 @@ function calculateStickyProgress(section) {
  * Each character fades in sequentially based on scroll progress
  * @param {NodeList} chars - Collection of character span elements
  * @param {number} progress - Animation progress (0 to 1)
- * @param {number} startOpacity - Starting opacity value (default: 0.5)
+ * @param {number} startOpacity - Starting opacity value (default: 0.3)
  */
-function animateTextCharacters(chars, progress, startOpacity = 0.5) {
+function animateTextCharacters(chars, progress, startOpacity = 0.3) {
     if (!chars || chars.length === 0) return;
 
     chars.forEach((char, index) => {
@@ -339,8 +339,7 @@ const heroChars = heroText?.querySelectorAll('span:not(.has-svg-animated)') || [
 // Get all SVG paths that need animation
 const heroPaths = heroText.querySelectorAll('.has-svg-animated svg path, .has-svg-animated svg line');
 initializeSvgPaths(heroPaths);
-console.log("initialized hero paths");
-console.log(heroPaths);
+
 /**
  * Animate hero section based on scroll progress
  * Stage 1: Text characters fade in (0-60%)
@@ -375,8 +374,9 @@ function animateHero() {
 // ============================================
 // "About me" section with headline, body text, and image
 
-const aboutText = document.querySelector("#aboutContent .text-content");
-const aboutHeadlineChars = document.querySelectorAll('#aboutHeader span:not(.has-svg-animated)');
+const aboutText = sections.about.querySelector("#aboutContent .text-content");
+const aboutHeadlineChars = sections.about.querySelectorAll('#aboutHeader span:not(.has-svg-animated)');
+
 
 if (aboutText) wrapTextInSpans(aboutText);
 
@@ -805,6 +805,86 @@ function animateCtaSection() {
     }
 };
 
+// ============================================
+// PROFESIONAL SECTION
+// ============================================
+
+const profesionalSection = document.querySelector('#profesionalSection');
+const profesionalSectionA = profesionalSection.querySelectorAll('a');
+profesionalSectionA.forEach(link=>{
+    wrapTextInSpans(link);
+})
+
+const profesionalChars = profesionalSection.querySelectorAll('span:not(.has-svg-animated)');
+
+const profesionalPaths = document.querySelectorAll('#profesionalSection .has-svg-animated svg line, #profesionalSection .has-svg-animated svg path');
+initializeSvgPaths(profesionalPaths);
+
+function animateProfSection() {
+
+    const progress = calculateStickyProgress(profesionalSection);
+
+    // Stage 1: Animate headline
+    if (profesionalChars.length > 0) {
+        if (progress <= CONFIG.cta.textEnd) {
+            const textProgress = (progress - 0.2) / (0.6 - 0.2);
+            animateTextCharacters(profesionalChars, textProgress, 0);
+        } else {
+            profesionalChars.forEach(char => char.style.opacity = 1);
+        }
+    }
+
+    // Stage 2: Animate SVGs
+    if (profesionalPaths.length > 0) {
+        if (progress >= CONFIG.cta.svgStart) {
+            const svgProgress = Math.min(1, (progress - CONFIG.cta.svgStart) / CONFIG.cta.svgEnd);
+            animateSvgPaths(profesionalPaths, svgProgress, true);
+        } else {
+            resetSvgPaths(profesionalPaths);
+        }
+    }
+};
+
+// ============================================
+// PROFESIONAL SECTION
+// ============================================
+
+const academicSection = document.querySelector('#academicSection');
+const academicSectionA = academicSection.querySelectorAll('a');
+academicSectionA.forEach(link=>{
+    wrapTextInSpans(link);
+})
+
+const academicChars = academicSection.querySelectorAll('span:not(.has-svg-animated)');
+
+const academicPaths = document.querySelectorAll('#academicSection .has-svg-animated svg line, #academicSection .has-svg-animated svg path');
+initializeSvgPaths(academicPaths);
+
+function animateAcademicSection() {
+
+    const progress = calculateStickyProgress(academicSection);
+
+    // Stage 1: Animate headline
+    if (academicChars.length > 0) {
+        if (progress <= CONFIG.cta.textEnd) {
+            const textProgress = (progress - 0.2) / (0.6 - 0.2);
+            animateTextCharacters(academicChars, textProgress, 0);
+        } else {
+            academicChars.forEach(char => char.style.opacity = 1);
+        }
+    }
+
+    // Stage 2: Animate SVGs
+    if (academicPaths.length > 0) {
+        if (progress >= CONFIG.cta.svgStart) {
+            const svgProgress = Math.min(1, (progress - CONFIG.cta.svgStart) / CONFIG.cta.svgEnd);
+            animateSvgPaths(academicPaths, svgProgress, true);
+        } else {
+            resetSvgPaths(academicPaths);
+        }
+    }
+};
+
 
 
 // ============================================
@@ -823,6 +903,8 @@ function handleScroll() {
             animatePublications();
             animateReviewsSection();
             animateCtaSection();
+            animateProfSection();
+            animateAcademicSection();
             ticking = false;
         });
         ticking = true;

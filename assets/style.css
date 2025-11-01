@@ -193,6 +193,7 @@ html {
 
 body {
     position: relative;
+    margin: 0;
 }
 
 /* ============================================
@@ -280,11 +281,11 @@ body {
 }
 
 #aboutSection .has-svg-animated svg line {
-    stroke: var(--yellow);
+    stroke: var(--red);
 }
 
 #aboutSection .has-svg-animated svg path {
-    fill: var(--yellow);
+    fill: var(--red);
     stroke: none;
 }
 
@@ -313,14 +314,14 @@ body {
 }
 
 #reviewsSection .has-svg-animated svg line {
-    stroke: var(--yellow);
+    stroke: var(--blue);
     stroke-miterlimit: 10;
     stroke-width: 8px;
     transform: rotate(-1deg);
 }
 
 #reviewsSection .has-svg-animated svg path {
-    fill: var(--yellow);
+    fill: var(--blue);
     stroke: none;
 }
 
@@ -333,7 +334,7 @@ body {
 }
 
 #ctaSection .has-svg-animated svg path {
-    fill: var(--blue);
+    fill: var(--red);
     stroke: none;
 }
 
@@ -346,8 +347,9 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 0 20px;
     overflow: clip;
+    padding: 0 30px;
+    ;
 }
 
 .section-content {
@@ -440,8 +442,9 @@ body {
 .about-column {
     display: flex;
     align-items: start;
-    justify-content: start;
+    justify-content: space-around;
     width: 45%;
+    height: 100%;
 }
 
 #aboutHeader {
@@ -467,7 +470,7 @@ body {
 @media screen and (max-width: 1000px) {
     #aboutContent {
         flex-direction: column;
-        align-items: center;
+        align-items: start;
         justify-content: center;
     }
 
@@ -478,7 +481,7 @@ body {
     .about-column {
         align-items: center;
         justify-content: center;
-        width: 90%;
+        width: 100%;
     }
 
     .about-text {
@@ -618,7 +621,7 @@ body {
 
 #publicationsSection {
     min-height: 100vh;
-    padding: 80px 0;
+    padding-top: 20%;
 }
 
 #publicationsSection .section-content {
@@ -730,9 +733,6 @@ body {
 }
 
 @media screen and (max-width: 480px) {
-    #publicationsSection {
-        padding: 40px 0;
-    }
 
     .publications-right {
         height: 200px;
@@ -791,8 +791,11 @@ body {
     max-width: 900px;
 }
 
-#ctaHeadline {
-    font-size: min(10vw, 85px);
+#ctaHeadline,
+#reviewsHeadline {
+    font-size: 124px;
+    text-align: center;
+    line-height: 130px;
 }
 
 
@@ -828,9 +831,9 @@ body {
 }
 
 #SuccessSpan svg {
-    width: 115%;
-    height: 330%;
-    rotate: -322deg;
+    width: 98%;
+    height: 344%;
+    rotate: 68deg;
     top: -56%;
     left: 60%;
 }
@@ -888,7 +891,7 @@ body {
 .crossed-over #imiDedicTimpul_svg {
     top: -85%;
     width: 100%;
-    height: 90%;
+    height: 70%;
     rotate: -2deg;
 }
 
@@ -917,9 +920,11 @@ body {
 
 
 #reviewHeadlineSpan svg {
-    left: 75%;
-    height: 160%;
-    top: -31%;
+    left: 70%;
+    height: 385%;
+    top: -157%;
+    width: 158%;
+    rotate: 13deg;
 }
 
 #reviewHeadlineSpan_svg path,
@@ -928,34 +933,101 @@ body {
 }
 
 #reviewsButtonSpan svg {
-    width: 100%;
-    height: 260%;
-    top: -100%;
-    left: -90%;
+    width: 82%;
+    height: 458%;
+    top: -247%;
+    left: -96%;
 }
 
 
 #ctaQustionMark svg {
-    width: 110%;
-    height: 160%;
-    top: -40%;
-    left: 73%;
-    rotate: -2deg;
+    width: 115%;
+    height: 260%;
+    top: -64%;
+    left: 79%;
+    rotate: 14deg;
 }
 
 #ctaArrowDown {
     -webkit-transform: scaleX(-1);
     transform: scaleX(-1);
-    left: -68%;
-    top: -113%;
-    height: 180%;
-    width: 63%;
+    left: -124%;
+    top: -282%;
+    height: 384%;
+    width: 117%;
 }
 
 #reviewsSection button .circled-button,
-#ctaSection button .circled-button {
-    width: 151%;
-    height: 345%;
-    top: -135%;
-    left: -24%;
+#ctaSection button .circled-button,
+#aboutSection button .circled-button {
+    width: 161%;
+    height: 432%;
+    top: -175%;
+    left: -31%;
+}
+
+
+/* ===============================================
+PROFESIONAL SECTION
+=================================================== */
+
+#profesionalSection .headline {
+    font-size: 124px;
+    text-align: center;
+    line-height: 130px;
+    color: var(--black);
+    text-decoration: none;
+    font-weight: bold;
+}
+
+
+#profesionalSection .sticky-section-content {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+#profesionalSection svg {
+    z-index: 1;
+    rotate: -3deg;
+    width: 110%;
+    left: -5%;
+}
+
+#profesionalSection svg line {
+    stroke: var(--blue);
+    stroke-width: 20px;
+}
+/* ===============================================
+PROFESIONAL SECTION
+=================================================== */
+
+#academicSection .headline {
+    font-size: 124px;
+    text-align: center;
+    line-height: 130px;
+    color: var(--black);
+    text-decoration: none;
+    font-weight: bold;
+}
+
+
+#academicSection .sticky-section-content {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+#academicSection svg {
+    z-index: 1;
+    rotate: -3deg;
+    width: 110%;
+    left: -5%;
+}
+
+#academicSection svg line {
+    stroke: var(--yellow);
+    stroke-width: 20px;
 }
