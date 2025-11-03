@@ -852,8 +852,8 @@ function animateProfSection() {
 
     // Stage 1: Animate headline
     if (profesionalChars.length > 0) {
-        if (progress <= CONFIG.cta.textEnd) {
-            const textProgress = (progress - 0.2) / (0.6 - 0.2);
+        if (progress <= 0.4) {
+            const textProgress = (progress - 0.15) / (0.4 - 0.15);
             animateTextCharacters(profesionalChars, textProgress, 0);
         } else {
             profesionalChars.forEach(char => char.style.opacity = 1);
@@ -862,8 +862,8 @@ function animateProfSection() {
 
     // Stage 2: Animate SVGs
     if (profesionalPaths.length > 0) {
-        if (progress >= CONFIG.cta.svgStart) {
-            const svgProgress = Math.min(1, (progress - CONFIG.cta.svgStart) / CONFIG.cta.svgEnd);
+        if (progress >= 0.55) {
+            const svgProgress = Math.min(1, (progress - 0.45) / 0.56);
             animateSvgPaths(profesionalPaths, svgProgress, true);
         } else {
             resetSvgPaths(profesionalPaths);
@@ -872,7 +872,7 @@ function animateProfSection() {
 };
 
 // ============================================
-// PROFESIONAL SECTION
+// Academic SECTION
 // ============================================
 
 const academicSection = document.querySelector('#academicSection');
@@ -892,8 +892,8 @@ function animateAcademicSection() {
 
     // Stage 1: Animate headline
     if (academicChars.length > 0) {
-        if (progress <= CONFIG.cta.textEnd) {
-            const textProgress = (progress - 0.2) / (0.6 - 0.2);
+        if (progress <= 0.4) {
+            const textProgress = (progress - 0.15) / (0.4 - 0.15);
             animateTextCharacters(academicChars, textProgress, 0);
         } else {
             academicChars.forEach(char => char.style.opacity = 1);
@@ -903,7 +903,7 @@ function animateAcademicSection() {
     // Stage 2: Animate SVGs
     if (academicPaths.length > 0) {
         if (progress >= CONFIG.cta.svgStart) {
-            const svgProgress = Math.min(1, (progress - CONFIG.cta.svgStart) / CONFIG.cta.svgEnd);
+            const svgProgress = Math.min(1, (progress - 0.45) / 0.56);
             animateSvgPaths(academicPaths, svgProgress, true);
         } else {
             resetSvgPaths(academicPaths);
