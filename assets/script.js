@@ -50,6 +50,22 @@ const CONFIG = {
         svgEnd: 0.55
     },
 
+    publications: {
+        // Viewport position thresholds (as percentage of viewport height)
+        viewportEntryPoint: 0.8,    // Text starts animating when item reaches 80% down viewport
+        viewportCompletePoint: 0.2,  // Text completes when item reaches 30% down viewport
+
+        // Character animation
+        textStartOpacity: 0.3,       // Initial opacity for text characters
+
+        // Button animation timing (matches text animation)
+        buttonMatchesText: true,     // Button chars animate with text, not delayed
+
+        // SVG animation timing (triggers when text reaches full opacity)
+        svgTriggerThreshold: 0.8,   // SVG starts when progress reaches % 
+        svgAnimationDuration: 0.2    // SVG animation duration as percentage (fast completion)
+    },
+
     cta: {
         textStart: 0.2,
         textEnd: 0.6,
@@ -380,7 +396,7 @@ const aboutMoreButton = sections.about.querySelector('.section-content-button');
 
 
 if (aboutText) wrapTextInSpans(aboutText);
- wrapTextInSpans (aboutMoreButton);
+wrapTextInSpans(aboutMoreButton);
 
 const aboutChars = sections.about?.querySelectorAll('span:not(.has-svg-animated)') || [];
 const aboutPaths = sections.about.querySelectorAll('#aboutSection .has-svg-animated svg path, #aboutSection .has-svg-animated svg line');
@@ -521,7 +537,7 @@ function animateServiceSection() {
 // ============================================
 // PARTNERS SECTION
 // ============================================
-// Grid of partner/client logos with fade-in animation
+// Grid of partner/client logos with fade-in + translateY animation based on scroll progress
 
 const partnersHeaderChars = document.querySelectorAll('#partnersHeader span:not(.has-svg-animated)');
 const partnerItems = document.querySelectorAll('.partners-table img');
@@ -531,22 +547,22 @@ initializeSvgPaths(partnerSvgPaths);
 // Set initial state for partner logos
 partnerItems.forEach(item => {
     item.style.opacity = '0';
-    item.style.transform = 'translateY(80px)';
-    item.style.transition = `opacity ${CONFIG.partners.animationDuration}s ease-out, transform ${CONFIG.partners.animationDuration}s ease-out`;
-    item.dataset.animated = 'false'; // Track animation state
+    item.style.transform = 'translateY(100px)';
+    item.style.willChange = 'opacity, transform'; // Performance hint
 });
 
 /**
  * Animate partners section:
- * Stage 1: Headline fades in (0-30%)
- * Stage 2: Logos fade in when they enter viewport (85% threshold)
+ * Stage 1: Headline fades in (0–30%)
+ * Stage 2: Logos fade + slide in progressively (30–90%)
+ * Stage 3: SVGs draw in (25–85%)
  */
 function animatePartners() {
     if (!sections.partners) return;
 
     const progress = calculateStickyProgress(sections.partners);
 
-    // Stage 1: Animate headline
+    // === Stage 1: Animate headline ===
     if (partnersHeaderChars.length > 0) {
         if (progress <= CONFIG.partners.headlineEnd) {
             const textProgress = (progress - CONFIG.partners.headlineStart) / (CONFIG.partners.headlineEnd - CONFIG.partners.headlineStart);
@@ -556,177 +572,185 @@ function animatePartners() {
         }
     }
 
-    // Stage 2: Animate partner logos when they enter viewport
-    if (partnerItems.length === 0) return;
+    // === Stage 2: Animate partner logos (scroll-based fade + translate) ===
+    const logoStart = 0.3;  // Scroll progress where logos start appearing
+    const logoEnd = 0.9;    // Scroll progress where all logos are fully visible
+    const visibleRange = logoEnd - logoStart;
 
-    partnerItems.forEach(item => {
-        // Skip if already animated (prevent re-triggering)
-        if (item.dataset.animated === 'true') return;
+    partnerItems.forEach((item, index) => {
+        // Slight delay between logos for staggered effect
+        const itemDelay = index * 0.05;
+        const localStart = logoStart + itemDelay;
+        const localEnd = localStart + visibleRange;
 
-        // Check if logo is in viewport
-        if (isInViewport(item, CONFIG.partners.triggerOffset)) {
-            item.dataset.animated = 'true';
-            item.style.opacity = '1';
-            item.style.transform = 'translateY(0)';
-        }
+        // Normalize progress for this logo
+        let itemProgress = (progress - localStart) / (localEnd - localStart);
+        itemProgress = Math.max(0, Math.min(1, itemProgress));
+
+        // Cubic easing for smooth entrance
+        const eased = 1 - Math.pow(1 - itemProgress, 3);
+
+        // Apply transform + opacity
+        const translateY = 100 - (eased * 100);
+        item.style.transform = `translateY(${translateY}px)`;
+        item.style.opacity = eased;
     });
 
-    // Stage 3: Animate SVGs
+    // === Stage 3: Animate SVGs ===
     if (partnerSvgPaths.length > 0) {
-        if (progress >= CONFIG.service.svgStart) {
-            const svgProgress = Math.min(1, (progress - CONFIG.service.svgStart) / CONFIG.service.svgDuration);
-            animateSvgPaths(partnerSvgPaths, svgProgress);
-        } else {
+        if (progress >= CONFIG.partners.svgStart && progress <= CONFIG.partners.svgEnd) {
+            const svgProgress = (progress - CONFIG.partners.svgStart) / (CONFIG.partners.svgEnd - CONFIG.partners.svgStart);
+            animateSvgPaths(partnerSvgPaths, svgProgress, true);
+        } else if (progress <= CONFIG.partners.svgStart) {
             resetSvgPaths(partnerSvgPaths);
         }
     }
-
 }
 
 // ============================================
 // PUBLICATIONS SECTION
 // ============================================
-// Scrollable list of publications with sticky headers and image switching
-
+const publicationsSection = document.querySelector('#publicationsSection');
 const publicationItems = document.querySelectorAll('.publication');
 const publicationImages = document.querySelectorAll('.publication-image');
-const isMobile = window.innerWidth <= 1024;
-
-// Wrap publication text content and store character references
-publicationItems.forEach(item => {
-    const textContent = item.querySelector('p');
-    if (textContent) {
-        wrapTextInSpans(textContent);
-        const chars = textContent.querySelectorAll('span:not(.has-svg-animated)');
-        item.dataset.textChars = 'wrapped';
-        item.textChars = chars; // Store reference for animation
-
-        // Set initial opacity (subtle baseline)
-        chars.forEach(char => {
-            char.style.opacity = 0.5;
-        });
-    }
-});
 
 /**
- * Animate publications section:
- * - Text fades in as publication enters viewport (30-70%)
- * - Images switch based on which publication is closest to center
- * - Headers become sticky while their content is visible
+ * Initialize publications: wrap text/buttons, prepare SVGs
  */
-function animatePublications() {
-    if (!sections.publications || publicationItems.length === 0) return;
-
-    const viewportCenter = window.innerHeight / 2;
-    const viewportTop = window.innerHeight * 0.3;    // 30% from top
-    const viewportBottom = window.innerHeight * 0.7;  // 70% from top
-    let activePublication = null;
-    let closestDistance = Infinity;
-
+function initializePublications() {
     publicationItems.forEach(item => {
-        const rect = item.getBoundingClientRect();
-        const itemCenter = rect.top + (rect.height / 2);
-        const distance = Math.abs(itemCenter - viewportCenter);
-
-        // Animate text content based on viewport position
-        if (item.textChars) {
-            // Text animates when between 30% and 70% of viewport
-            if (rect.top < viewportBottom && rect.bottom > viewportTop) {
-                let textProgress = 0;
-
-                const itemTop = rect.top;
-                const entryPoint = viewportBottom;   // Start at 70%
-                const completePoint = viewportTop;   // Complete at 30%
-
-                if (itemTop <= completePoint) {
-                    // Item has reached completion point - full opacity
-                    textProgress = 1;
-                } else if (itemTop < entryPoint) {
-                    // Item is between entry and complete - animate
-                    const range = entryPoint - completePoint;
-                    const currentPos = itemTop - completePoint;
-                    textProgress = 1 - (currentPos / range);
-                    textProgress = Math.max(0, Math.min(1, textProgress));
-                } else {
-                    // Item hasn't entered yet
-                    textProgress = 0;
-                }
-
-                // Apply animation
-                if (textProgress >= 1) {
-                    // Explicitly set full opacity when animation completes
-                    item.textChars.forEach(char => {
-                        char.style.opacity = 1;
-                    });
-                } else {
-                    animateTextCharacters(item.textChars, textProgress, 0.3);
-                }
-            } else if (rect.bottom <= viewportTop) {
-                // Item is above viewport - keep at full opacity
-                item.textChars.forEach(char => {
-                    char.style.opacity = 1;
-                });
-            } else {
-                // Item is below viewport - reset to low opacity
-                item.textChars.forEach(char => {
-                    char.style.opacity = 0.3;
-                });
+        // Wrap and store paragraph text characters
+        const paragraph = item.querySelector('p');
+        if (paragraph) {
+            wrapTextInSpans(paragraph);
+            item.textChars = paragraph.querySelectorAll('span:not(.has-svg-animated)');
+            item.textChars.forEach(char => char.style.opacity = CONFIG.publications.textStartOpacity);
+        }
+        
+        // Wrap and store button text characters
+        const button = item.querySelector('.section-content-button');
+        if (button) {
+            wrapTextInSpans(button);
+            item.buttonChars = button.querySelectorAll('span:not(.has-svg-animated)');
+            item.buttonChars.forEach(char => char.style.opacity = CONFIG.publications.textStartOpacity);
+            
+            // Store button SVG paths (circled-button)
+            const buttonSvg = button.querySelectorAll('.circled-button path');
+            if (buttonSvg.length > 0) {
+                item.buttonSvg = buttonSvg;
+                initializeSvgPaths(buttonSvg);
             }
         }
+        
+        // Store header SVG paths (underline)
+        const headerSvg = item.querySelectorAll('.publication-sticky-header .has-svg-animated svg line, .publication-sticky-header .has-svg-animated svg path');
+        if (headerSvg.length > 0) {
+            item.headerSvg = headerSvg;
+            initializeSvgPaths(headerSvg);
+        }
+    });
+}
 
-        // Mobile: simpler logic - just track closest publication
-        if (isMobile) {
-            if (rect.top < window.innerHeight && rect.bottom > 0) {
-                if (distance < closestDistance) {
-                    closestDistance = distance;
-                    activePublication = item.dataset.publication;
-                }
-            }
-        } else {
-            // Desktop: implement sticky header behavior
-            const header = item.querySelector('.publication-sticky-header');
-            const textContent = item.querySelector('p');
+/**
+ * Calculate animation progress based on viewport position
+ */
+function calculatePublicationProgress(rect) {
+    const entry = window.innerHeight * CONFIG.publications.viewportEntryPoint;
+    const complete = window.innerHeight * CONFIG.publications.viewportCompletePoint;
+    
+    if (rect.top <= complete) return 1;
+    if (rect.top >= entry) return 0;
+    
+    return 1 - ((rect.top - complete) / (entry - complete));
+}
 
-            if (header && textContent) {
-                const textRect = textContent.getBoundingClientRect();
+/**
+ * Animate character opacity
+ */
+function animateChars(chars, progress) {
+    if (!chars) return;
+    
+    if (progress >= 1) {
+        chars.forEach(char => char.style.opacity = 1);
+    } else if (progress > 0) {
+        animateTextCharacters(chars, progress, CONFIG.publications.textStartOpacity);
+    } else {
+        chars.forEach(char => char.style.opacity = CONFIG.publications.textStartOpacity);
+    }
+}
 
-                // Check if 25% of text content is still visible
-                const textVisible = textRect.bottom - textRect.height * 0.25;
+/**
+ * Animate SVG paths with threshold trigger
+ */
+function animateSvg(paths, progress) {
+    if (!paths) return;
+    
+    const threshold = CONFIG.publications.svgTriggerThreshold;
+    const duration = CONFIG.publications.svgAnimationDuration;
+    
+    if (progress < threshold) {
+        resetSvgPaths(paths);
+    } else if (progress >= threshold + duration) {
+        animateSvgPaths(paths, 1, true);
+    } else {
+        const svgProgress = (progress - threshold) / duration;
+        animateSvgPaths(paths, svgProgress, true);
+    }
+}
 
-                // Make header sticky while text is visible
-                if (textRect.top <= 20 && textVisible > 0) {
-                    header.style.position = 'sticky';
-                } else if (textVisible <= 0) {
-                    header.style.position = 'relative';
-                }
-            }
-
-            // Track which publication is in center zone for image switching
-            if (rect.top < viewportBottom && rect.bottom > viewportTop) {
-                item.classList.add('in-view');
-            } else {
-                item.classList.remove('in-view');
-            }
-
-            // Track closest publication to viewport center
-            if (distance < closestDistance && rect.top < window.innerHeight && rect.bottom > 0) {
-                closestDistance = distance;
-                activePublication = item.dataset.publication;
+/**
+ * Update active image based on closest publication to viewport center
+ */
+function updateActiveImage() {
+    if (publicationImages.length === 0) return;
+    
+    const center = window.innerHeight / 2;
+    let closest = { distance: Infinity, publication: null };
+    
+    publicationItems.forEach(item => {
+        const rect = item.getBoundingClientRect();
+        if (rect.top < window.innerHeight && rect.bottom > 0) {
+            const itemCenter = rect.top + rect.height / 2;
+            const distance = Math.abs(itemCenter - center);
+            
+            if (distance < closest.distance) {
+                closest = { distance, publication: item.dataset.publication };
             }
         }
     });
-
-    // Switch active image based on which publication is closest to center
-    if (activePublication && publicationImages.length > 0) {
+    
+    if (closest.publication) {
         publicationImages.forEach(img => {
-            if (img.dataset.publication === activePublication) {
-                img.classList.add('active');
-            } else {
-                img.classList.remove('active');
-            }
+            img.classList.toggle('active', img.dataset.publication === closest.publication);
         });
     }
 }
+
+/**
+ * Main animation function - called on scroll
+ */
+function animatePublications() {
+    if (!publicationsSection) return;
+    
+    publicationItems.forEach(item => {
+        const progress = calculatePublicationProgress(item.getBoundingClientRect());
+        
+        // Animate text and button characters (synced)
+        animateChars(item.textChars, progress);
+        animateChars(item.buttonChars, progress);
+        
+        // Animate SVGs (triggered at threshold)
+        animateSvg(item.headerSvg, progress);
+        animateSvg(item.buttonSvg, progress);
+    });
+    
+    if(window.innerWidth > 1028)
+    updateActiveImage();
+}
+
+// Initialize on load
+initializePublications();
+
 
 // ============================================
 // REVIEWS SECTION
@@ -813,7 +837,7 @@ function animateCtaSection() {
 
 const profesionalSection = document.querySelector('#profesionalSection');
 const profesionalSectionA = profesionalSection.querySelectorAll('a');
-profesionalSectionA.forEach(link=>{
+profesionalSectionA.forEach(link => {
     wrapTextInSpans(link);
 })
 
@@ -853,7 +877,7 @@ function animateProfSection() {
 
 const academicSection = document.querySelector('#academicSection');
 const academicSectionA = academicSection.querySelectorAll('a');
-academicSectionA.forEach(link=>{
+academicSectionA.forEach(link => {
     wrapTextInSpans(link);
 })
 
