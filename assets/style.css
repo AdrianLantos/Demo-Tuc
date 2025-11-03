@@ -325,6 +325,17 @@ body {
     stroke: none;
 }
 
+#publicationsSection .has-svg-animated svg path {
+        fill: var(--yellow);
+    stroke: none;
+}
+
+#publicationsSection .has-svg-animated svg line {
+    stroke: var(--blue);
+    stroke-miterlimit: 10;
+    stroke-width: 8px;
+    transform: rotate(-1deg);
+}
 
 #ctaSection .has-svg-animated svg line {
     stroke: var(--blue);
@@ -376,20 +387,24 @@ body {
 
 .more-button {
     font-style: italic;
-    text-decoration: underline;
     border: none;
     padding: 0;
     background-color: transparent;
     font-family: var(--mainFont);
-    font-size: var(--textContentFontSize);
     text-align: start;
     font-weight: 600;
+    transition: var(--transition-fast);
 }
 
 .more-button:hover {
     color: var(--visitedLinkColor);
     cursor: pointer;
+    color: var(--grey);
 
+}
+
+.section-content-button{
+     font-size: var(--textContentFontSize);
 }
 
 .cta-button,
@@ -401,13 +416,30 @@ body {
     background: transparent;
     color: var(--textColor);
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all var(--transition-fast);
     font-style: italic;
 }
 
 .cta-button:hover,
 .fade-in-button:hover {
     color: var(--grey);
+}
+
+#publicationsSection .text-content .more-button{
+    margin-top: 20px;
+}
+
+@media screen and (max-width: 768px) {
+
+    #ctaSection,
+    #reviewsSection {
+        padding: 40px 20px;
+    }
+
+    .cta-button,
+    .fade-in-button {
+        font-size: min(6vw, 35px);
+    }
 }
 
 /* ============================================
@@ -459,7 +491,7 @@ body {
     object-fit: contain;
 }
 
-#aboutContent .text-content span:not('has-svg-animated') {
+#aboutContent p.text-content span:not(.has-svg-animated) {
     opacity: 0.5;
 }
 
@@ -798,25 +830,6 @@ body {
     line-height: 130px;
 }
 
-
-@media screen and (max-width: 768px) {
-
-    #ctaSection,
-    #reviewsSection {
-        padding: 40px 20px;
-    }
-
-    .cta-button,
-    .fade-in-button {
-        font-size: min(6vw, 35px);
-    }
-}
-
-@media screen and (max-width: 480px) {
-
-    .cta-button,
-    .fade-in-button {}
-}
 
 /* ============================================
    SVG POSITIONING

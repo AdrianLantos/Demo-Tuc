@@ -17,7 +17,7 @@ const CONFIG = {
     about: {
         headlineStart: 0.1,    // Headline starts immediately (0% scroll)
         headlineEnd: 0.25,    // Headline completes (30% scroll)
-        textStart: 0.25,     // Body text starts after headline (35% scroll)
+        textStart: 0.1,     // Body text starts after headline (35% scroll)
         textEnd: 0.7,        // Body text completes (60% scroll)
         svgStart: 0.25,      // SVG animation starts (55% scroll)
         svgEnd: 0.75         // SVG animation completes (95% scroll)
@@ -375,12 +375,14 @@ function animateHero() {
 // "About me" section with headline, body text, and image
 
 const aboutText = sections.about.querySelector("#aboutContent .text-content");
-const aboutHeadlineChars = sections.about.querySelectorAll('#aboutHeader span:not(.has-svg-animated)');
+// const aboutHeadlineChars = sections.about.querySelectorAll('#aboutHeader span:not(.has-svg-animated)');
+const aboutMoreButton = sections.about.querySelector('.section-content-button');
 
 
 if (aboutText) wrapTextInSpans(aboutText);
+ wrapTextInSpans (aboutMoreButton);
 
-const aboutChars = aboutText?.querySelectorAll('span:not(.has-svg-animated)') || [];
+const aboutChars = sections.about?.querySelectorAll('span:not(.has-svg-animated)') || [];
 const aboutPaths = sections.about.querySelectorAll('#aboutSection .has-svg-animated svg path, #aboutSection .has-svg-animated svg line');
 initializeSvgPaths(aboutPaths);
 
@@ -395,15 +397,15 @@ function animateAbout() {
 
     const progress = calculateProgress(sections.about);
 
-    // Stage 1: Animate headline first
-    if (aboutHeadlineChars.length > 0) {
-        if (progress <= CONFIG.about.headlineEnd) {
-            const textProgress = (progress - CONFIG.about.headlineStart) / (CONFIG.about.headlineEnd - CONFIG.about.headlineStart);
-            animateTextCharacters(aboutHeadlineChars, textProgress);
-        } else {
-            aboutHeadlineChars.forEach(char => char.style.opacity = 1);
-        }
-    }
+    // // Stage 1: Animate headline first
+    // if (aboutHeadlineChars.length > 0) {
+    //     if (progress <= CONFIG.about.headlineEnd) {
+    //         const textProgress = (progress - CONFIG.about.headlineStart) / (CONFIG.about.headlineEnd - CONFIG.about.headlineStart);
+    //         animateTextCharacters(aboutHeadlineChars, textProgress);
+    //     } else {
+    //         aboutHeadlineChars.forEach(char => char.style.opacity = 1);
+    //     }
+    // }
 
     // Stage 2: Animate body text after headline
     if (progress >= CONFIG.about.textStart) {
@@ -601,7 +603,7 @@ publicationItems.forEach(item => {
 
         // Set initial opacity (subtle baseline)
         chars.forEach(char => {
-            char.style.opacity = 0.3;
+            char.style.opacity = 0.5;
         });
     }
 });
