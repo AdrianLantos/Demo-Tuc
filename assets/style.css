@@ -397,12 +397,13 @@ body {
     background-color: transparent;
     font-family: var(--mainFont);
     text-align: start;
+    text-decoration: none;
     font-weight: 600;
     transition: var(--transition-fast);
+    color: var(--black);
 }
 
 .more-button:hover {
-    color: var(--visitedLinkColor);
     cursor: pointer;
     color: var(--grey);
 
@@ -724,6 +725,7 @@ body {
 
 .publication p {
     margin: 0;
+    margin-bottom: 20px;
 }
 
 .publications-image-container {
@@ -987,9 +989,9 @@ body {
     width: 117%;
 }
 
-#reviewsSection button .circled-button,
-#ctaSection button .circled-button,
-#aboutSection button .circled-button {
+#reviewsSection a .circled-button,
+#ctaSection a .circled-button,
+#aboutSection a .circled-button {
     width: 161%;
     height: 432%;
     top: -175%;
